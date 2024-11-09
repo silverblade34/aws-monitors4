@@ -1,8 +1,5 @@
-# "org" ensures this Service is used with the correct Serverless Framework Access Key.
 org: maquiadev1
-# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
 app: aws-monitors4
-# "service" is the name of this project. This will also be added to your AWS resource names.
 service: aws-monitors4
 
 provider:
@@ -14,7 +11,8 @@ provider:
       Action:
         - dynamodb:*
       Resource:
-        - arn:aws:dynamodb:us-east-2:466309146603:table/notificationTable
+        - {"Fn::GetAtt": ["ms4notificationTable", "Arn"]}
+        - {"Fn::GetAtt": ["ms4companiesTable", "Arn"]}
 
 functions:
   addNotification:
@@ -26,10 +24,23 @@ functions:
 
 resources:
   Resources:
-    notificationTable:
+    ms4notificationTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: notificationTable
+        TableName: ms4notificationTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    ms4companiesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ms4companiesTable
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S

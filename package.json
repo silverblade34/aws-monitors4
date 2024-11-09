@@ -2,7 +2,9 @@
   "dependencies": {
     "@middy/core": "^5.5.1",
     "@middy/http-json-body-parser": "^5.5.1",
-    "middy": "^0.36.0"
+    "aws-sdk": "^2.1692.0",
+    "middy": "^0.36.0",
+    "uuid": "^11.0.2"
   },
   "type": "module"
 }
