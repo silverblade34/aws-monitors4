@@ -8,6 +8,31 @@ const addNotification = async (event) => {
         const dynamodb = new AWS.DynamoDB.DocumentClient()
         const id = uuidv4();
         const notificationReceived = event.body;
+
+        if (notificationReceived.token === "") {
+            return {
+                statusCode: 401,
+                body: JSON.stringify({ message: "El token no puede estar vacio" }),
+            };
+        }
+        const params = {
+            TableName: "ms4companiesTable",
+            FilterExpression: "#token = :token",
+            ExpressionAttributeNames: {
+                "#token": "token" // Definimos el alias para el atributo 'token'
+            },
+            ExpressionAttributeValues: {
+                ":token": notificationReceived.token,
+            },
+        };
+
+        const result = await dynamodb.scan(params).promise();
+        if (result.Items.length === 0) {
+            return {
+                statusCode: 401,
+                body: JSON.stringify({ message: "El token no es valido" }),
+            };
+        }
         const notification = {
             ...notificationReceived,
             id,
@@ -17,6 +42,7 @@ const addNotification = async (event) => {
             linkImage: notificationReceived.linkImage ? notificationReceived.linkImage : "",
             attentions: []
         }
+        delete notification.token;
         await dynamodb.put({
             TableName: "ms4notificationTable",
             Item: notification
