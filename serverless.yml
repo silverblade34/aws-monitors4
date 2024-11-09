@@ -6,6 +6,8 @@ provider:
   name: aws
   runtime: nodejs20.x
   region: us-east-2
+  environment:
+    JWT_SECRET: "MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQAyqmpCKGy5j8PLkED2+W4Urq3BINP"
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -15,11 +17,23 @@ provider:
         - {"Fn::GetAtt": ["ms4companiesTable", "Arn"]}
 
 functions:
+  login:
+    handler: src/login.handler
+    events:
+      - httpApi:
+          path: /login
+          method: post
   addNotification:
     handler: src/addNotification.handler
     events:
       - httpApi:
           path: /addNotification
+          method: post
+  addCompany:
+    handler: src/addCompany.handler
+    events:
+      - httpApi:
+          path: /addCompany
           method: post
 
 resources:
