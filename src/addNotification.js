@@ -33,15 +33,22 @@ const addNotification = async (event) => {
                 body: JSON.stringify({ message: "El token no es valido" }),
             };
         }
+        // const currentTime = Math.floor(Date.now() / 1000);
+        // const ttl = currentTime + 60 * 60 * 24 * 30 * 2;
+        
+        // Configuracion test TTL 10 segundos
+        const currentTime = Math.floor(Date.now() / 1000);
+        const ttl = currentTime + 10;
         const notification = {
             ...notificationReceived,
             id,
             state: 0,
-            guid: notificationReceived.guid ? notificationReceived.guid : "",
-            linkVideo: notificationReceived.linkVideo ? notificationReceived.linkVideo : "",
-            linkImage: notificationReceived.linkImage ? notificationReceived.linkImage : "",
-            attentions: []
-        }
+            guid: notificationReceived.guid || "",
+            linkVideo: notificationReceived.linkVideo || "",
+            linkImage: notificationReceived.linkImage || "",
+            attentions: [],
+            ttl,
+        };
         delete notification.token;
         await dynamodb.put({
             TableName: "ms4notificationTable",

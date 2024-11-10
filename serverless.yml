@@ -6,6 +6,11 @@ provider:
   name: aws
   runtime: nodejs20.x
   region: us-east-2
+  apiGateway:
+    usagePlan:
+      throttle:
+        burstLimit: 0
+        rateLimit: 2
   environment:
     JWT_SECRET: "MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQAyqmpCKGy5j8PLkED2+W4Urq3BINP"
   iamRoleStatements:
@@ -51,6 +56,9 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+        TimeToLiveSpecification:
+          AttributeName: ttl
+          Enabled: true
     ms4companiesTable:
       Type: AWS::DynamoDB::Table
       Properties:
