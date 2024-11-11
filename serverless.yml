@@ -20,6 +20,7 @@ provider:
       Resource:
         - {"Fn::GetAtt": ["ms4notificationTable", "Arn"]}
         - {"Fn::GetAtt": ["ms4companiesTable", "Arn"]}
+        - {"Fn::GetAtt": ["ms4connectedUsers", "Arn"]}
 
 functions:
   login:
@@ -28,11 +29,11 @@ functions:
       - httpApi:
           path: /login
           method: post
-  addNotification:
-    handler: src/addNotification.handler
+  sendNotification:
+    handler: src/sendNotification.handler
     events:
       - httpApi:
-          path: /addNotification
+          path: /sendNotification
           method: post
   addCompany:
     handler: src/addCompany.handler
@@ -40,6 +41,16 @@ functions:
       - httpApi:
           path: /addCompany
           method: post
+  connectNotification:
+    handler: src/connectNotification.handler
+    events:
+      - websocket:
+          route: $connect
+  disconnectConnection:
+    handler: src/disconnectConnection.handler
+    events:
+      - websocket:
+          route: $disconnect
 
 resources:
   Resources:
@@ -53,9 +64,7 @@ resources:
         KeySchema:
           - AttributeName: id
             KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+        BillingMode: PAY_PER_REQUEST
         TimeToLiveSpecification:
           AttributeName: ttl
           Enabled: true
@@ -69,6 +78,17 @@ resources:
         KeySchema:
           - AttributeName: id
             KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+        BillingMode: PAY_PER_REQUEST
+    ms4connectedUsers:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ms4connectedUsers
+        AttributeDefinitions:
+          - AttributeName: connectionId
+            AttributeType: S
+          - AttributeName: role
+            AttributeType: S
+        KeySchema:
+          - AttributeName: connectionId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST

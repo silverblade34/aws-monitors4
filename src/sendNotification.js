@@ -3,9 +3,10 @@ import { v4 as uuidv4 } from "uuid";
 import jsonBodyParser from '@middy/http-json-body-parser'
 import AWS from "aws-sdk"
 
-const addNotification = async (event) => {
+const sendNotification = async (event) => {
     try {
         const dynamodb = new AWS.DynamoDB.DocumentClient()
+        const apiGateway = new AWS.ApiGatewayManagementApi({ endpoint: event.requestContext.domainName + '/' });
         const id = uuidv4();
         const notificationReceived = event.body;
 
@@ -33,12 +34,13 @@ const addNotification = async (event) => {
                 body: JSON.stringify({ message: "El token no es valido" }),
             };
         }
-        // const currentTime = Math.floor(Date.now() / 1000);
-        // const ttl = currentTime + 60 * 60 * 24 * 30 * 2;
-        
-        // Configuracion test TTL 10 segundos
         const currentTime = Math.floor(Date.now() / 1000);
-        const ttl = currentTime + 10;
+        const ttl = currentTime + 60 * 60 * 24 * 30 * 2;
+
+        // Configuracion test TTL 10 segundos
+        // const currentTime = Math.floor(Date.now() / 1000);
+        // const ttl = currentTime + 10;
+
         const notification = {
             ...notificationReceived,
             id,
@@ -54,6 +56,27 @@ const addNotification = async (event) => {
             TableName: "ms4notificationTable",
             Item: notification
         }).promise()
+
+        const usersToNotify = await dynamodb.scan({
+            TableName: "ms4connectedUsers",
+        }).promise();
+
+        await Promise.all(usersToNotify.Items.map(async (user) => {
+            try {
+                await apiGateway.postToConnection({
+                    ConnectionId: user.connectionId,
+                    Data: JSON.stringify({ message: "Nueva notificación", data: notification }),
+                }).promise();
+            } catch (error) {
+                if (error.statusCode === 410) {
+                    await dynamodb.delete({
+                        TableName: "ms4connectedUsers",
+                        Key: { connectionId: user.connectionId },
+                    }).promise();
+                }
+            }
+        }));
+
         return {
             statusCode: 200,
             body: JSON.stringify({ message: "Se ha registrado la notificacion correctamente", data: notification }),
@@ -66,5 +89,5 @@ const addNotification = async (event) => {
     }
 };
 
-export const handler = middy(addNotification).use(jsonBodyParser());
+export const handler = middy(sendNotification).use(jsonBodyParser());
 
