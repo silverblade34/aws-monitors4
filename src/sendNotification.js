@@ -9,7 +9,8 @@ const sendNotification = async (event) => {
         const apiGateway = new AWS.ApiGatewayManagementApi({ endpoint: event.requestContext.domainName + '/' });
         const id = uuidv4();
         const notificationReceived = event.body;
-
+        const socket = ref(null);
+        
         if (notificationReceived.token === "") {
             return {
                 statusCode: 401,

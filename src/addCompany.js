@@ -7,23 +7,23 @@ import jwt from "jsonwebtoken";
 
 const addCompany = async (event) => {
     try {
-        const token = event.headers.Authorization || event.headers.authorization;
+        // const token = event.headers.Authorization || event.headers.authorization;
 
-        if (!token) {
-            return {
-                statusCode: 403,
-                body: JSON.stringify({ message: "No autorizado" }),
-            };
-        }
+        // if (!token) {
+        //     return {
+        //         statusCode: 403,
+        //         body: JSON.stringify({ message: "No autorizado" }),
+        //     };
+        // }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        // const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        if (decoded.role !== "MASTER") {
-            return {
-                statusCode: 403,
-                body: JSON.stringify({ message: "No tienes permisos para realizar esta operación" }),
-            };
-        }
+        // if (decoded.role !== "MASTER") {
+        //     return {
+        //         statusCode: 403,
+        //         body: JSON.stringify({ message: "No tienes permisos para realizar esta operación" }),
+        //     };
+        // }
 
         const dynamodb = new AWS.DynamoDB.DocumentClient()
         const id = uuidv4();

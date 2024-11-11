@@ -64,7 +64,9 @@ resources:
         KeySchema:
           - AttributeName: id
             KeyType: HASH
-        BillingMode: PAY_PER_REQUEST
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
         TimeToLiveSpecification:
           AttributeName: ttl
           Enabled: true
@@ -78,7 +80,9 @@ resources:
         KeySchema:
           - AttributeName: id
             KeyType: HASH
-        BillingMode: PAY_PER_REQUEST
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
     ms4connectedUsers:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -86,9 +90,9 @@ resources:
         AttributeDefinitions:
           - AttributeName: connectionId
             AttributeType: S
-          - AttributeName: role
-            AttributeType: S
         KeySchema:
           - AttributeName: connectionId
             KeyType: HASH
-        BillingMode: PAY_PER_REQUEST
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
